@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Reactive.Linq;
+using Stabilograph.Core;
+using Stabilograph.Core.Configuration;
+using Stabilograph.Core.Diagnostic;
+using Stabilograph.Core.Filters;
+using Stabilograph.Core.Processing;
 using Stabilograph.Protocol;
-using Stabilograph.Protocol.Configuration;
 using SerialPort = System.IO.Ports.SerialPort;
 
 namespace StabilographTest
 {
     internal class Program
     {
-        private static Configuration _configuration = Configuration.Load();
+        private static Root _conf = Loader.Load();
 
         private static void Main(string[] args)
         {
@@ -46,13 +50,13 @@ namespace StabilographTest
             common.Subscribe(
                     weights => Console.WriteLine(string.Join(", ", weights.Select(f => f.ToString("0.00")))));
 
-            var interpolators = _configuration.Sensors.Select(s => new Interpolator.ChannelInterpolator(s.Interpolation)).ToList();
+            var interpolators = _conf.Sensors.Select(s => new Interpolator.ChannelInterpolator(s.Interpolation)).ToList();
             var interpolator = new Interpolator(interpolators);
-            var platformSize = _configuration.Platform.Size;
-            var leftPlatform = new Stabilograph.Protocol.Platform(platformSize, _configuration.Sensors.Take(4).ToList(), _configuration.Platform.LeftCorrection);
-            var rightPlatform = new Stabilograph.Protocol.Platform(platformSize, _configuration.Sensors.Skip(4).ToList(), _configuration.Platform.RightCorrection);
+            var platformSize = _conf.Platform.Size;
+            var leftPlatform = new PlatformDiagnostic(platformSize, _conf.Sensors.Take(4).ToList(), _conf.Platform.LeftCorrection);
+            var rightPlatform = new PlatformDiagnostic(platformSize, _conf.Sensors.Skip(4).ToList(), _conf.Platform.RightCorrection);
 
-            var filtered = Stabilograph.Protocol.Filters.SortSkipTakeAvgFilter.Filter(observer, 8, 2, 4);
+            var filtered = SortSkipTakeAvgFilter.Filter(observer, 8, 2, 4);
             var weightObserver = interpolator.Interpolate(filtered);
             var leftWeightObserver = weightObserver.Select(list => list.Take(4).ToList());
             var rightWeightObserver = weightObserver.Select(list => list.Skip(4).ToList());

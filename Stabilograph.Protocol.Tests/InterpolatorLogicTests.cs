@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using FluentAssertions;
 using NUnit.Framework;
+using Stabilograph.Core;
+using Stabilograph.Core.Processing;
 
 namespace Stabilograph.Protocol.Tests
 {

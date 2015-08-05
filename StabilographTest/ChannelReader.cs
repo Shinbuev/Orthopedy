@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Stabilograph.Core.Configuration;
 
 namespace Stabilograph.Protocol
 {
@@ -39,7 +40,7 @@ namespace Stabilograph.Protocol
         private float[] _max;
         private float[] _min;
 
-        public ChannelReaderStub(Configuration.Configuration config)
+        public ChannelReaderStub(Root config)
         {
             _weights = config.Sensors.Select(s => s.Interpolation[0].X).ToList();
             _vectors = config.Sensors.Select(s => s.Interpolation[1].X - s.Interpolation[0].X)

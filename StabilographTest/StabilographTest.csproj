@@ -72,9 +72,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Stabilograph.Protocol\Stabilograph.Protocol.csproj">
+    <ProjectReference Include="..\Stabilograph.Core\Stabilograph.Core.csproj">
       <Project>{a9ab48e0-d1a3-4832-8217-59633a736fe1}</Project>
-      <Name>Stabilograph.Protocol</Name>
+      <Name>Stabilograph.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -17,15 +17,19 @@ using JsonConfig;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using Stabilograph.Protocol;
-using Stabilograph.Protocol.Configuration;
+using Stabilograph.Core;
+using Stabilograph.Core.Configuration;
+using Stabilograph.Core.Diagnostic;
+using Stabilograph.Core.Filters;
+using Stabilograph.Core.IO;
+using Stabilograph.Core.Processing;
 using SerialPort = System.IO.Ports.SerialPort;
 
 namespace Stabilograph
 {
     public partial class MainForm : Form
     {
-        private Configuration _configuration;
+        private Root _config;
         private PatientForm _patientForm;
         private ChannelsForm _channelsForm;
         
@@ -34,7 +38,7 @@ namespace Stabilograph
             InitializeComponent();
             InitializePlot();
 
-            _configuration = LoadConfiguration();
+            _config = LoadConfiguration();
             InitializeSerialPort();
             
             this.SerialPortOpened +=SerialPortOpenedHandler;
@@ -83,13 +87,13 @@ namespace Stabilograph
 
         private void InitializeProcessing(IConnectableObservable<List<float>> channelObserver)
         {
-            var interpolators = _configuration.Sensors.Select(s => new Interpolator.ChannelInterpolator(s.Interpolation)).ToList();
+            var interpolators = _config.Sensors.Select(s => new Interpolator.ChannelInterpolator(s.Interpolation)).ToList();
             var interpolator = new Interpolator(interpolators);
-            var platformSize = _configuration.Platform.Size;
-            var leftPlatform = new Protocol.Platform(platformSize, _configuration.Sensors.Take(4).ToList(), _configuration.Platform.LeftCorrection);
-            var rightPlatform = new Protocol.Platform(platformSize, _configuration.Sensors.Skip(4).ToList(), _configuration.Platform.RightCorrection);
+            var platformSize = _config.Platform.Size;
+            var leftPlatform = new PlatformDiagnostic(platformSize, _config.Sensors.Take(4).ToList(), _config.Platform.LeftCorrection);
+            var rightPlatform = new PlatformDiagnostic(platformSize, _config.Sensors.Skip(4).ToList(), _config.Platform.RightCorrection);
 
-            var filtered = Protocol.Filters.CurrentAvfFilter.Filter(channelObserver, 10);
+            var filtered = CurrentAvfFilter.Filter(channelObserver, 10);
             var weightObserver = interpolator.Interpolate(filtered);
             var leftWeightObserver = weightObserver.Select(list => list.Take(4).ToList());
             var rightWeightObserver = weightObserver.Select(list => list.Skip(4).ToList());
@@ -108,21 +112,21 @@ namespace Stabilograph
 
         private void InitializeSerialPort()
         {
-            serialPort.PortName = _configuration.Port.Name;
-            serialPort.BaudRate = _configuration.Port.Baudrate;
-            serialPort.Parity = _configuration.Port.Parity;
+            serialPort.PortName = _config.Port.Name;
+            serialPort.BaudRate = _config.Port.Baudrate;
+            serialPort.Parity = _config.Port.Parity;
         }
 
-        private Configuration LoadConfiguration()
+        private Root LoadConfiguration()
         {
             try
             {
-                return Configuration.Load();
+                return Loader.Load();
 
             }
             catch (Exception e)
             {
-                MessageBox.Show("Cannot load configuration. Reason: " + e.ToString() + "Application will be closed", "Configuration Error", MessageBoxButtons.OK);
+                MessageBox.Show("Cannot load configuration. Reason: " + e.ToString() + "Application will be closed", "Loader Error", MessageBoxButtons.OK);
                 Close();
                 return null;
             }
@@ -234,7 +238,7 @@ namespace Stabilograph
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            this.serialPortTimer.Interval = _configuration.Port.OpenInterval;
+            this.serialPortTimer.Interval = _config.Port.OpenInterval;
             this.serialPortTimer.Enabled = true;
         }
 
@@ -273,9 +277,9 @@ namespace Stabilograph
             try
             {
                 //var protocol = new Protocol.Protocol(serialPort);
-                //var reader = new ChannelReader(protocol);
+                //var reader = new Protocol(protocol);
                 //var channels = reader.ReadWeights();
-                var reader = new ChannelReaderStub(_configuration);
+                var reader = new ProtocolStub(_config);
 
                 ShowPortSettings(this, EventArgs.Empty);
                 serialPortTimer.Enabled = false;
@@ -305,7 +309,7 @@ namespace Stabilograph
                 _indicatorsForm.ResetIndicators();
 
                 _diagnosticTimer.Tick += CompleteDiagnostic;
-                _diagnosticTimer.Interval = (int) _configuration.Diagnostic.Duration.TotalMilliseconds;
+                _diagnosticTimer.Interval = (int) _config.Diagnostic.Duration.TotalMilliseconds;
                 _diagnosticTimer.Enabled = true;
             }
             catch (Exception ex)

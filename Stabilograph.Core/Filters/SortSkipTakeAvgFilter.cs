@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Stabilograph.Protocol.Filters
+namespace Stabilograph.Core.Filters
 {
     public static class SortSkipTakeAvgFilter
     {

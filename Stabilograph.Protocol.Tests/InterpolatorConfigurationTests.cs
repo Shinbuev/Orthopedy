@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using JsonConfig;
 using NUnit.Framework;
+using Stabilograph.Core;
+using Stabilograph.Core.Configuration;
+using Stabilograph.Core.Processing;
 
 namespace Stabilograph.Protocol.Tests
 {
@@ -61,7 +64,7 @@ namespace Stabilograph.Protocol.Tests
         public void ConfigurationTest()
         {
             var config = ParseConfigurationFromResources();
-            var configuration = Configuration.Configuration.Load(config);
+            var configuration = Loader.Load(config);
 
             var sensors = configuration.Sensors;
             sensors.Count.Should().Be(8);

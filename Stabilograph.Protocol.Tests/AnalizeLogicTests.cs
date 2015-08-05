@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using System.Drawing;
 using FluentAssertions;
+using Stabilograph.Core;
+using Stabilograph.Core.Diagnostic;
 
 
 namespace Stabilograph.Protocol.Tests
@@ -33,7 +35,7 @@ namespace Stabilograph.Protocol.Tests
             var sequence = 0;
             Func<DateTime> dtf = () => dt + TimeSpan.FromTicks(TimeSpan.FromMilliseconds(100).Ticks * sequence++);
             
-            var state = new Platform.State(dtf);
+            var state = new PlatformDiagnostic.State(dtf);
             var s1 = state.ProcessNext(new PointF());
             var s2 = s1.ProcessNext(new PointF());
             var s3 = s2.ProcessNext(new PointF());
@@ -53,7 +55,7 @@ namespace Stabilograph.Protocol.Tests
             var sequence = 0;
             Func<DateTime> dtf = () => dt + TimeSpan.FromTicks(TimeSpan.FromMilliseconds(100).Ticks * sequence++);
 
-            var state = new Platform.State(dtf);
+            var state = new PlatformDiagnostic.State(dtf);
             var s1 = state.ProcessNext(new PointF(1, 1));
             var s2 = s1.ProcessNext(new PointF(1, 1));
             var s3 = s2.ProcessNext(new PointF(1, 1));
@@ -73,7 +75,7 @@ namespace Stabilograph.Protocol.Tests
             var sequence = 0;
             Func<DateTime> dtf = () => dt + TimeSpan.FromTicks(TimeSpan.FromMilliseconds(100).Ticks * sequence++);
 
-            var state = new Platform.State(dtf);
+            var state = new PlatformDiagnostic.State(dtf);
             var s1 = state.ProcessNext(new PointF(1, 1));
             var s2 = s1.ProcessNext(new PointF(1, -1));
             var s3 = s2.ProcessNext(new PointF(-1, -1));
@@ -116,7 +118,7 @@ namespace Stabilograph.Protocol.Tests
             var sequence = 0;
             Func<DateTime> dtf = () => dt + TimeSpan.FromTicks(TimeSpan.FromMilliseconds(100).Ticks * sequence++);
 
-            var state = new Platform.State(dtf);
+            var state = new PlatformDiagnostic.State(dtf);
             var s1 = state.ProcessNext(new PointF(1, 0));
             var s2 = s1.ProcessNext(new PointF(0, -1));
             var s3 = s2.ProcessNext(new PointF(-1, 0));

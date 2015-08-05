@@ -8,7 +8,8 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Stabilograph.Protocol;
+using Stabilograph.Core;
+using Stabilograph.Core.Diagnostic;
 
 namespace Stabilograph
 {
@@ -16,8 +17,8 @@ namespace Stabilograph
     {
         private IObservable<PointF> _leftCenterObserver;
         private IObservable<PointF> _rightCenterObserver;
-        private Platform _leftPlatform;
-        private Platform _rightPlatform;
+        private PlatformDiagnostic _leftPlatformDiagnostic;
+        private PlatformDiagnostic _rightPlatformDiagnostic;
         private IDisposable _disposable;
 
         public IndicatorsForm()
@@ -29,14 +30,14 @@ namespace Stabilograph
         {
             Unsubscribe();
 
-            var leftIndicators = _leftPlatform.Analize(_leftCenterObserver);
-            var rightIndicators = _rightPlatform.Analize(_rightCenterObserver);
+            var leftIndicators = _leftPlatformDiagnostic.Analize(_leftCenterObserver);
+            var rightIndicators = _rightPlatformDiagnostic.Analize(_rightCenterObserver);
 
             var allIndicators = leftIndicators.Zip(rightIndicators, (indicators, indicators1) => Tuple.Create(indicators, indicators1));
             _disposable = allIndicators.ObserveOn(this).Subscribe(UpdateView);
         }
 
-        private void UpdateView(Tuple<Platform.Indicators, Platform.Indicators> indicators)
+        private void UpdateView(Tuple<PlatformDiagnostic.Indicators, PlatformDiagnostic.Indicators> indicators)
         {
             var left = indicators.Item1;
             var right = indicators.Item2;
@@ -63,11 +64,11 @@ namespace Stabilograph
             }
         }
 
-        public void Prepare(Platform leftPlatform, IObservable<PointF> leftCenterObserver, Platform rightPlatform, IObservable<PointF> rightCenterObserver)
+        public void Prepare(PlatformDiagnostic leftPlatformDiagnostic, IObservable<PointF> leftCenterObserver, PlatformDiagnostic rightPlatformDiagnostic, IObservable<PointF> rightCenterObserver)
         {
-            _leftPlatform = leftPlatform;
+            _leftPlatformDiagnostic = leftPlatformDiagnostic;
             _leftCenterObserver = leftCenterObserver;
-            _rightPlatform = rightPlatform;
+            _rightPlatformDiagnostic = rightPlatformDiagnostic;
             _rightCenterObserver = rightCenterObserver;
         }
 

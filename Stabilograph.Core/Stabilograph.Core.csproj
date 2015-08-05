@@ -7,8 +7,8 @@
     <ProjectGuid>{A9AB48E0-D1A3-4832-8217-59633A736FE1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Stabilograph.Protocol</RootNamespace>
-    <AssemblyName>Stabilograph.Protocol</AssemblyName>
+    <RootNamespace>Stabilograph.Core</RootNamespace>
+    <AssemblyName>Stabilograph.Core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -60,16 +60,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="Configuration\Diagnostic.cs" />
+    <Compile Include="Configuration\Loader.cs" />
+    <Compile Include="Configuration\Platform.cs" />
+    <Compile Include="Configuration\Root.cs" />
+    <Compile Include="Configuration\Sensor.cs" />
+    <Compile Include="Configuration\SerialPort.cs" />
     <Compile Include="Filters\CurrentAvfFilter.cs" />
     <Compile Include="Filters\SortSkipTakeAvgFilter.cs" />
     <Compile Include="Filters\UnwildZipFilter.cs" />
-    <Compile Include="Platform.cs" />
-    <Compile Include="PointFFunctions.cs" />
-    <Compile Include="Protocol.cs" />
+    <Compile Include="IO\IndicatorReaderWorker.cs" />
+    <Compile Include="IO\IProtocol.cs" />
+    <Compile Include="IO\ObserwableProtocol.cs" />
+    <Compile Include="IO\ProtocolException.cs" />
+    <Compile Include="Diagnostic\PlatformDiagnostic.cs" />
+    <Compile Include="Utils\PointFFunctions.cs" />
+    <Compile Include="IO\Protocol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ChannelReader.cs" />
-    <Compile Include="Interpolator.cs" />
+    <Compile Include="IO\ChannelReader.cs" />
+    <Compile Include="Processing\Interpolator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Reactive.Linq;
 using System.Linq;
-using System.Reactive.Concurrency;
-using Stabilograph.Protocol.Configuration;
+using System.Reactive.Linq;
+using Stabilograph.Core.Configuration;
+using Stabilograph.Core.Utils;
 
-namespace Stabilograph.Protocol
+namespace Stabilograph.Core.Diagnostic
 {
-    public class Platform
+    public class PlatformDiagnostic
     {
         private readonly List<Sensor> _sensors;
         private readonly PointF _correction;
@@ -128,7 +127,7 @@ namespace Stabilograph.Protocol
 
         public readonly PointF GeometricalCenter;
 
-        public Platform(SizeF size, List<Sensor> sensors, PointF correction)
+        public PlatformDiagnostic(SizeF size, List<Sensor> sensors, PointF correction)
         {
             _sensors = sensors;
             _correction = correction;

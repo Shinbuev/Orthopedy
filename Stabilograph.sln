@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StabilographTest", "StabilographTest\StabilographTest.csproj", "{0CAC4BAA-B84B-4ECF-A4E3-CFB4FD295E63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stabilograph.Protocol", "Stabilograph.Protocol\Stabilograph.Protocol.csproj", "{A9AB48E0-D1A3-4832-8217-59633A736FE1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stabilograph.Core", "Stabilograph.Core\Stabilograph.Core.csproj", "{A9AB48E0-D1A3-4832-8217-59633A736FE1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stabilograph", "Stabilograph\Stabilograph.csproj", "{6924E9D2-4925-48A2-B03A-7FB0AED48D35}"
 EndProject
