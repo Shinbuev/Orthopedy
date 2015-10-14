@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Linq;
-using System.Reactive.Linq;
 
 namespace Stabilograph.Core.Processing
 {
@@ -18,9 +17,9 @@ namespace Stabilograph.Core.Processing
             _interpolators = interpolators;
         }
 
-        public IObservable<List<float>> Interpolate(IObservable<List<float>> inputs)
+        public List<float> Interpolate(List<float> inputs)
         {
-            var output = inputs.Select(values => _interpolators.Zip(values, (interpolator, value) => interpolator.Interpolate(value)).ToList());
+            var output = _interpolators.Zip(inputs, (interpolator, value) => interpolator.Interpolate(value)).ToList();
             return output;
         } 
 

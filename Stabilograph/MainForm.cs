@@ -6,9 +6,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,22 +28,35 @@ namespace Stabilograph
     {
         private Root _config;
         private PatientForm _patientForm;
-        private ChannelsForm _channelsForm;
-        
+        private List<Interpolator.ChannelInterpolator> _channellInterpolators;
+        private Interpolator _interpolator;
+        SizeF _platformSize;
+        PlatformDiagnostic _leftPlatformDiagnostic;
+        PlatformDiagnostic _rightPlatformDiagnostic;
+        PlatformDiagnostic.State _leftState = new PlatformDiagnostic.State();
+        PlatformDiagnostic.State _rightState = new PlatformDiagnostic.State();
+
         public MainForm()
         {
             InitializeComponent();
             InitializePlot();
 
             _config = LoadConfiguration();
+            _channellInterpolators = _config
+                .Sensors.Select(s => new Interpolator.ChannelInterpolator(s.Interpolation)).ToList();
+            _interpolator = new Interpolator(_channellInterpolators);
+            _platformSize = _config.Platform.Size;
+            _leftPlatformDiagnostic = new PlatformDiagnostic(_platformSize, _config.Sensors.Take(4).ToList(), _config.Platform.LeftCorrection);
+            _rightPlatformDiagnostic = new PlatformDiagnostic(_platformSize, _config.Sensors.Skip(4).ToList(), _config.Platform.RightCorrection);
+
             InitializeSerialPort();
-            
-            this.SerialPortOpened +=SerialPortOpenedHandler;
+
+            this.SerialPortOpened += SerialPortOpenedHandler;
 
             SuspendLayout();
 
             notifyIcon1.Icon = SystemIcons.Application;
-            
+
             InitializePatientForm();
             InitializeIndicatorsForm();
             this.Load += ShowPatientForm;
@@ -66,48 +76,22 @@ namespace Stabilograph
 
             form.Closed += OnChildFormClosed;
             Interlocked.Exchange(ref _indicatorsForm, form);
-        
         }
 
         private void SerialPortOpenedHandler(object sender, EventArgs e)
         {
-            var weightPublisher = sender as IObservable<List<float>>;
-
-            if (weightPublisher != null)
+            var protocol = sender as IProtocol;
+            if (protocol != null)
             {
-                Interlocked.Exchange(ref _weightObserver, weightPublisher.Publish());
-                Interlocked.Exchange(ref _observerDisposable, _weightObserver.Connect());
-
-                InitializeChannelForm(_weightObserver);
-                ShowChannelForm(this, EventArgs.Empty);
-
-                InitializeProcessing(_weightObserver);
+                InitializeProcessing(protocol);
             }
         }
 
-        private void InitializeProcessing(IConnectableObservable<List<float>> channelObserver)
+
+        private void InitializeProcessing(IProtocol protocol)
         {
-            var interpolators = _config.Sensors.Select(s => new Interpolator.ChannelInterpolator(s.Interpolation)).ToList();
-            var interpolator = new Interpolator(interpolators);
-            var platformSize = _config.Platform.Size;
-            var leftPlatform = new PlatformDiagnostic(platformSize, _config.Sensors.Take(4).ToList(), _config.Platform.LeftCorrection);
-            var rightPlatform = new PlatformDiagnostic(platformSize, _config.Sensors.Skip(4).ToList(), _config.Platform.RightCorrection);
-
-            var filtered = CurrentAvfFilter.Filter(channelObserver, 10);
-            var weightObserver = interpolator.Interpolate(filtered);
-            var leftWeightObserver = weightObserver.Select(list => list.Take(4).ToList());
-            var rightWeightObserver = weightObserver.Select(list => list.Skip(4).ToList());
-
-            var leftCenterObserver = leftPlatform.Center(leftWeightObserver);
-            var rightCenterObserver = rightPlatform.Center(rightWeightObserver);
-
-            _indicatorsForm.Prepare(leftPlatform, leftCenterObserver, rightPlatform, rightCenterObserver);
-
-            var plotDataObserver = leftCenterObserver.ObserveOn(Scheduler.Default).Zip(rightCenterObserver,
-                (l, r) => new PlotData() {LeftPoint = l, RightPoint = r});
-
-            StartTracking(plotDataObserver);
-            
+            readerTimer.Tag = protocol;
+            readerTimer.Enabled = true;
         }
 
         private void InitializeSerialPort()
@@ -182,23 +166,6 @@ namespace Stabilograph
                 }
             }
         }
-        
-
-        private void InitializeChannelForm(IObservable<List<float>> observable)
-        {
-            //mock
-            //IObservable<List<float>> mock = Observable.Interval(TimeSpan.FromMilliseconds(100)).Select(tick => NextValues(tick));
-            
-            var form = new ChannelsForm(observable);
-            form.TopLevel = false;
-            form.Parent = this;
-            form.TopMost = true;
-            form.FormBorderStyle = FormBorderStyle.SizableToolWindow;
-            Controls.Add(form);
-            
-            form.Closed += OnChildFormClosed;
-            Interlocked.Exchange(ref _channelsForm, form);
-        }
 
         void OnChildFormClosed(object sender, EventArgs e)
         {
@@ -209,31 +176,15 @@ namespace Stabilograph
                 if (Controls.Contains(form))
                 {
                     Controls.Remove(form);
-                    this.Load -= ShowChannelForm;
+                    Refresh();
                 }
             }
         }
 
-        void ShowChannelForm(object sender, EventArgs e)
-        {
-            var form = _channelsForm;
-            if (form != null)
-            {
-                try
-                {
-                    form.Top = ClientRectangle.Bottom - form.Height;
-                    form.Show();
-                }
-                catch (Exception exception)
-                {
-                    MessageBox.Show(@"Cannot show ChannelForm: " + exception.Message);
-                }
-            }
-        }
+
 
         private int mockValue = 0;
         private IDisposable _observerDisposable;
-        private IConnectableObservable<List<float>> _weightObserver;
         private IndicatorsForm _indicatorsForm;
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -252,16 +203,6 @@ namespace Stabilograph
             notifyIcon1.BalloonTipClosed -= ShowPortSettings;
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            //channels
-            if (_channelsForm.IsDisposed)
-            {
-                InitializeChannelForm(_weightObserver);
-                ShowChannelForm(this, EventArgs.Empty);
-            }
-        }
-
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             //patient
@@ -276,15 +217,19 @@ namespace Stabilograph
         {
             try
             {
-                //var protocol = new Protocol.Protocol(serialPort);
-                //var reader = new Protocol(protocol);
-                //var channels = reader.ReadWeights();
-                var reader = new ProtocolStub(_config);
-
+                IProtocol reader;
+                if (_config.Debug)
+                {
+                    reader = new ProtocolStub(_config);
+                }
+                else
+                {
+                    reader = new Protocol(serialPort);
+                }
                 ShowPortSettings(this, EventArgs.Empty);
                 serialPortTimer.Enabled = false;
 
-                OnSerialPortOpened(reader.AsObservable(TimeSpan.FromMilliseconds(100)));
+                OnSerialPortOpened(reader);
             }
             catch (Exception exception)
             {
@@ -293,11 +238,11 @@ namespace Stabilograph
         }
 
         private event EventHandler SerialPortOpened;
-        
-        protected void OnSerialPortOpened(IObservable<List<float>> readerObservable)
+
+        protected void OnSerialPortOpened(IProtocol reader)
         {
             var handler = SerialPortOpened;
-            if (handler != null) handler(readerObservable, EventArgs.Empty);
+            if (handler != null) handler(reader, EventArgs.Empty);
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)
@@ -306,10 +251,10 @@ namespace Stabilograph
             {
                 toolStripButton3.Enabled = false;
                 ResetSeries();
-                _indicatorsForm.ResetIndicators();
+                //_indicatorsForm.ResetIndicators();
 
                 _diagnosticTimer.Tick += CompleteDiagnostic;
-                _diagnosticTimer.Interval = (int) _config.Diagnostic.Duration.TotalMilliseconds;
+                _diagnosticTimer.Interval = (int)_config.Diagnostic.Duration.TotalMilliseconds;
                 _diagnosticTimer.Enabled = true;
             }
             catch (Exception ex)
@@ -325,13 +270,51 @@ namespace Stabilograph
                 toolStripButton3.Enabled = true;
                 _diagnosticTimer.Enabled = false;
                 _diagnosticTimer.Tick -= CompleteDiagnostic;
-                _indicatorsForm.CompleteDiagnostic();
+                //_indicatorsForm.CompleteDiagnostic();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Stop Test");
             }
 
+        }
+
+        //private LinkedList<float[]> _weightsBuffer = new LinkedList<float[]>();
+        private void ReadWeightsFromProtocolAndUpdateModel(object sender, EventArgs e)
+        {
+            var reader = readerTimer.Tag as IProtocol;
+
+            if (reader != null)
+            {
+                var weights = reader.ReadWeights();
+                UpdateModel(weights.ToList());
+            }
+        }
+
+        public PlotData _plotData = new PlotData();
+        private void UpdateModel(List<float> weights)
+        {
+            var interpolatedWeights = _interpolator.Interpolate(weights);
+            var leftWeights = interpolatedWeights.Take(4).ToList();
+            var rightWeights = interpolatedWeights.Skip(4).ToList();
+            var leftCenter = _leftPlatformDiagnostic.CalculateCenterOf(leftWeights);
+            var rightCenter = _rightPlatformDiagnostic.CalculateCenterOf(rightWeights);
+            _leftState.ProcessNext(leftCenter);
+            _rightState.ProcessNext(rightCenter);
+            
+            _indicatorsForm.UpdateView(_leftState.Indicators, _rightState.Indicators);
+            var data = new PlotData() {LeftPoint = leftCenter, RightPoint = rightCenter};
+            Interlocked.Exchange(ref _plotData, data);
+        }
+
+
+        private void updatePlotTimer_Tick(object sender, EventArgs e)
+        {
+            if (updatePlotTimer.Tag != _plotData)
+            {
+                updatePlotTimer.Tag = _plotData;
+                this.DisplayPlotData(_plotData);
+            }
         }
     }
 }

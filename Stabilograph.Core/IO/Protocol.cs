@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Stabilograph.Core.IO
 {
-    public class Protocol
+    public class Protocol: IProtocol
     {
         private readonly byte[] _handShake = {0xAE};
         private readonly byte _packetEnd = 0xEF;
@@ -60,9 +60,9 @@ namespace Stabilograph.Core.IO
             return values;
         }
 
-        public List<float> ReadWeights()
+        public float[] ReadWeights()
         {
-            return ReadWeights(ReadChannels());
+            return ReadWeights(ReadChannels()).ToArray();
         }
 
         private int BytesToUint(int lsb, int msb)

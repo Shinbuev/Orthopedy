@@ -22,6 +22,7 @@ namespace Stabilograph.Core.Configuration
                 Platform = ReadPlatformConfig(config),
                 Port = ReadSerialPortConfig(config),
                 Version = config.Version,
+                Debug = config.Debug,
                 Diagnostic = ReadDiagnostic(config),
                 Sensors = ReadSensors(config)
             };

@@ -38,6 +38,8 @@
             this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
             this.serialPortTimer = new System.Windows.Forms.Timer(this.components);
             this._diagnosticTimer = new System.Windows.Forms.Timer(this.components);
+            this.readerTimer = new System.Windows.Forms.Timer(this.components);
+            this.updatePlotTimer = new System.Windows.Forms.Timer(this.components);
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -62,12 +64,12 @@
             // toolStripButton1
             // 
             this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton1.Enabled = false;
             this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
             this.toolStripButton1.Size = new System.Drawing.Size(36, 36);
             this.toolStripButton1.Text = "toolStripButton1";
-            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // toolStripButton2
             // 
@@ -92,6 +94,15 @@
             // serialPortTimer
             // 
             this.serialPortTimer.Tick += new System.EventHandler(this.OpenSerialPort);
+            // 
+            // readerTimer
+            // 
+            this.readerTimer.Tick += new System.EventHandler(this.ReadWeightsFromProtocolAndUpdateModel);
+            // 
+            // updatePlotTimer
+            // 
+            this.updatePlotTimer.Enabled = true;
+            this.updatePlotTimer.Tick += new System.EventHandler(this.updatePlotTimer_Tick);
             // 
             // MainForm
             // 
@@ -124,6 +135,8 @@
         private System.Windows.Forms.Timer serialPortTimer;
         private System.Windows.Forms.ToolStripButton toolStripButton3;
         private System.Windows.Forms.Timer _diagnosticTimer;
+        private System.Windows.Forms.Timer readerTimer;
+        private System.Windows.Forms.Timer updatePlotTimer;
     }
 }
 

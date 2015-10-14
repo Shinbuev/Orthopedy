@@ -5,7 +5,6 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,7 +17,7 @@ namespace Stabilograph
 {
     public partial class MainForm
     {
-        public struct PlotData
+        public class PlotData
         {
             public PointF LeftPoint;
             public PointF RightPoint;
@@ -33,6 +32,7 @@ namespace Stabilograph
         private LineSeries _leftSeries;
         private LineSeries _rightSeries;
         private int _numberOfPoints = 1000;
+        //private IContainer components;
 
         private OxyPlot.WindowsForms.PlotView plotView;
 
@@ -64,16 +64,19 @@ namespace Stabilograph
             var left = -right;
 
             var myModel = new PlotModel();
+            
             myModel.PlotType = PlotType.Cartesian;
             //myModel.Series.Add(new FunctionSeries(d => PlatformHeight * Math.Cos(d) / 2, left, right, 0.1, "cos(x)"));
 
             var leftFootPlatformSeries = new LineSeries();
+            leftFootPlatformSeries.MinimumSegmentLength = 16;
             leftFootPlatformSeries.Points.Add(new DataPoint(left, bottom));
             leftFootPlatformSeries.Points.Add(new DataPoint(left, top));
             leftFootPlatformSeries.Points.Add(new DataPoint(right, top));
             leftFootPlatformSeries.Points.Add(new DataPoint(right, bottom));
             leftFootPlatformSeries.Points.Add(new DataPoint(left, bottom));
-            leftFootPlatformSeries.LineJoin = LineJoin.Round;
+            //leftFootPlatformSeries.LineJoin = LineJoin.Round;
+            //leftFootPlatformSeries //.StrokeTh LineSeries.StrokeThickness
             leftFootPlatformSeries.Color = greyColor;
 
             leftFootPlatformSeries.XAxisKey = "x1";
@@ -81,6 +84,7 @@ namespace Stabilograph
             myModel.Series.Add(leftFootPlatformSeries);
 
             var rightFootPlatformSeries = new LineSeries();
+            rightFootPlatformSeries.MinimumSegmentLength = 16;
             rightFootPlatformSeries.Points.Add(new DataPoint(left, bottom));
             rightFootPlatformSeries.Points.Add(new DataPoint(left, top));
             rightFootPlatformSeries.Points.Add(new DataPoint(right, top));
@@ -106,7 +110,7 @@ namespace Stabilograph
             //axisY.AbsoluteMinimum = bottom -1;
             //axisY.AbsoluteMaximum = top + 1;
             axisY.MajorGridlineStyle = LineStyle.Solid;
-            axisY.MinorGridlineStyle = LineStyle.Dot;
+            //axisY.MinorGridlineStyle = LineStyle.Dot;
             myModel.Axes.Add(axisY);
 
 
@@ -122,7 +126,7 @@ namespace Stabilograph
             //leftX.PositionAtZeroCrossing = true;
             //leftX.TickStyle = OxyPlot.Axes.TickStyle.Crossing;
             leftX.MajorGridlineStyle = LineStyle.Solid;
-            leftX.MinorGridlineStyle = LineStyle.Dot;
+            //leftX.MinorGridlineStyle = LineStyle.Dot;
             
             myModel.Axes.Add(leftX);
 
@@ -138,7 +142,7 @@ namespace Stabilograph
             //rightX.TickStyle = OxyPlot.Axes.TickStyle.Crossing;
             rightX.StartPosition = 0.5;
             rightX.MajorGridlineStyle = LineStyle.Solid;
-            rightX.MinorGridlineStyle = LineStyle.Dot;
+            //rightX.MinorGridlineStyle = LineStyle.Dot;
             
             myModel.Axes.Add(rightX);
 
@@ -153,8 +157,8 @@ namespace Stabilograph
             //rightX.PositionAtZeroCrossing = true;
             //rightX.TickStyle = OxyPlot.Axes.TickStyle.Crossing;
             //rightX.StartPosition = 0.5;
-            topX.MajorGridlineStyle = LineStyle.Solid;
-            topX.MinorGridlineStyle = LineStyle.Dot;
+            //topX.MajorGridlineStyle = LineStyle.Solid;
+            //topX.MinorGridlineStyle = LineStyle.Dot;
 
             myModel.Axes.Add(topX);
 
@@ -169,8 +173,8 @@ namespace Stabilograph
             //axisY2.TickStyle = OxyPlot.Axes.TickStyle.Crossing;
             //axisY2.AbsoluteMinimum = bottom - 10;
             //axisY2.AbsoluteMaximum = top + 10;
-            axisY2.MajorGridlineStyle = LineStyle.Solid;
-            axisY2.MinorGridlineStyle = LineStyle.Dot;
+            //axisY2.MajorGridlineStyle = LineStyle.Solid;
+            //axisY2.MinorGridlineStyle = LineStyle.Dot;
             
             myModel.Axes.Add(axisY2);
 
@@ -179,7 +183,7 @@ namespace Stabilograph
             //secondSeries.YAxisKey = "y2";
             //myModel.Series.Add(secondSeries);
 
-            var leftSeries = new LineSeries();
+            var leftSeries = new LineSeries(){MinimumSegmentLength = 2};
             leftSeries.XAxisKey = "x1";
             leftSeries.YAxisKey = "y1";
             leftSeries.Color = OxyColor.FromRgb(255, 0, 0);
@@ -191,7 +195,7 @@ namespace Stabilograph
             myModel.Series.Add(leftSeries);
             _leftSeries = leftSeries;
 
-            var rightSeries = new LineSeries();
+            var rightSeries = new LineSeries() { MinimumSegmentLength = 2 };
             rightSeries.XAxisKey = "x2";
             rightSeries.YAxisKey = "y2";
             rightSeries.Color = OxyColor.FromRgb(255, 0, 0);
@@ -204,33 +208,34 @@ namespace Stabilograph
             _rightSeries = rightSeries;
             //plotView.Enabled = false;
 
+            
             this.plotView.Model = myModel;
             
 
         }
 
-        public void StartTracking(IObservable<PlotData> data)
-        {
-            var disposable = data.ObserveOn(this).Subscribe(DisplayPlotData);
-        }
-
         public void DisplayPlotData(PlotData data)
         {
-            //_leftSeries.Points.Clear();
-            //_rightSeries.Points.Clear();
+//            if (InvokeRequired)
+//            {
+//                Invoke(new MethodInvoker(() => DisplayPlotData(data)));
+//            }
+//            else
+//            {
+                _leftSeries.Points.Add(new DataPoint(data.LeftPoint.X, data.LeftPoint.Y));
+                if (_leftSeries.Points.Count > _numberOfPoints)
+                    _leftSeries.Points.RemoveAt(0);
 
-            _leftSeries.Points.Add(new DataPoint(data.LeftPoint.X, data.LeftPoint.Y));
-            if (_leftSeries.Points.Count > _numberOfPoints)
-                _leftSeries.Points.RemoveAt(0);
-            
-            _rightSeries.Points.Add(new DataPoint(data.RightPoint.X, data.RightPoint.Y));
-            if (_rightSeries.Points.Count > _numberOfPoints)
-                _rightSeries.Points.RemoveAt(0);
+                _rightSeries.Points.Add(new DataPoint(data.RightPoint.X, data.RightPoint.Y));
+                if (_rightSeries.Points.Count > _numberOfPoints)
+                    _rightSeries.Points.RemoveAt(0);
 
-            Debug.WriteLine("Centers: {0}, {1}", data.LeftPoint, data.RightPoint);
+                Debug.WriteLine("Centers: {0}, {1}", data.LeftPoint, data.RightPoint);
 
-            this.plotView.InvalidatePlot(true);
-            
+                //this.plotView.InvalidatePlot(false);
+                //if(_leftSeries.Points.Count % 10 == 0)
+                    plotView.InvalidatePlot(false);
+            //}
         }
 
         public void ResetSeries()
@@ -239,5 +244,11 @@ namespace Stabilograph
             _rightSeries.Points.Clear();
             plotView.Invalidate(true);
         }
+
+//
+//        private void updatePlotTimer_Tick(object sender, EventArgs e)
+//        {
+//            DisplayPlotData(_plotData);
+//        }
     }
 }

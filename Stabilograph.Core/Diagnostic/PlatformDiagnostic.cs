@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Reactive.Linq;
 using Stabilograph.Core.Configuration;
 using Stabilograph.Core.Utils;
 
@@ -44,7 +43,7 @@ namespace Stabilograph.Core.Diagnostic
             public Indicators Indicators { get; set; }
             public readonly List<double> XAmplitudes = new List<double>();
             public readonly List<double> YAmplitudes = new List<double>();
-            public State ProcessNext(PointF next)
+            public void ProcessNext(PointF next)
             {
                 var currentDateTime = _currentTime();
                 if (StartTime == default(DateTime))
@@ -106,8 +105,6 @@ namespace Stabilograph.Core.Diagnostic
 
                 Count = Count + 1;
                 LastCenter = next;
-
-                return this;
             }
         }
 
@@ -154,36 +151,24 @@ namespace Stabilograph.Core.Diagnostic
             return new PointF(centerX, centerY);
         }
 
-        public IObservable<PointF> Center(IObservable<List<float>> channelsObservable)
-        {
-            return channelsObservable.Select(channels =>
-            {
-                if (channels != null && channels.Count == 4)
-                {
-                    return CalculateCenterOf(channels);
-                }
+//        public IObservable<Indicators> Analize(IObservable<PointF> centerObservable)
+//        {
+//            return centerObservable.Scan(new State(), ProcessNextPoint)
+//                .Select(state => state.Indicators);
+//        }
 
-                return GeometricalCenter;
-            });
-        }
+//        public State ProcessNextPoint(State state, PointF next)
+//        {
+//            return state.ProcessNext(next);
+//        }
 
-        public IObservable<Indicators> Analize(IObservable<PointF> centerObservable)
-        {
-            return centerObservable.Scan(new State(), ProcessNextPoint)
-                .Select(state => state.Indicators);
-        }
-
-        private State ProcessNextPoint(State state, PointF next)
-        {
-            return state.ProcessNext(next);
-        }
-
-        public IObservable<double> PathLength(IObservable<PointF> centerObservable)
-        {
-            return
-                centerObservable.Scan(new Tuple<double, PointF>(0, PointF.Empty), CalculateLength)
-                    .Select(tuple => tuple.Item1);
-        }
+        //TODO: remove Rx
+//        public IObservable<double> PathLength(IObservable<PointF> centerObservable)
+//        {
+//            return
+//                centerObservable.Scan(new Tuple<double, PointF>(0, PointF.Empty), CalculateLength)
+//                    .Select(tuple => tuple.Item1);
+//        }
 
         private Tuple<double, PointF> CalculateLength(Tuple<double, PointF> acc, PointF nextPoint)
         {
@@ -206,15 +191,11 @@ namespace Stabilograph.Core.Diagnostic
             return new PointF((left.X + right.X) / 2, (left.Y + right.Y) / 2);
         }
 
-        public IObservable<PointF> Middle(IObservable<PointF> left, IObservable<PointF> right)
-        {
-            var centers = Observable.Zip(left, right);
-            return centers.Select(points => CalculateMiddleOf(points[0], points[1]));
-        }
-
-        public Indicators Process(State state, PointF nextPoint)
-        {
-            return new Indicators();
-        }
+        //TODO: remove Rx
+//        public IObservable<PointF> Middle(IObservable<PointF> left, IObservable<PointF> right)
+//        {
+//            var centers = Observable.Zip(left, right);
+//            return centers.Select(points => CalculateMiddleOf(points[0], points[1]));
+//        }
     }
 }

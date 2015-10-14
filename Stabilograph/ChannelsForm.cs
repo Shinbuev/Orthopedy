@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using OxyPlot;
@@ -75,7 +74,7 @@ namespace Stabilograph
 
         private void ChannelsForm_Activated(object sender, EventArgs e)
         {
-            Interlocked.Exchange(ref _disposable, _observable.ObserveOn(this).Subscribe(UpdatePlot, CloseOnError));
+            //Interlocked.Exchange(ref _disposable, _observable.ObserveOn(this).Subscribe(UpdatePlot, CloseOnError));
             Debug.WriteLine("Subscribing to channels on activation of ChannelForm");
         }
 
