@@ -39,7 +39,7 @@ namespace Stabilograph
         public MainForm()
         {
             InitializeComponent();
-            InitializePlot();
+            //InitializePlot();
 
             _config = LoadConfiguration();
             _channellInterpolators = _config
@@ -250,7 +250,7 @@ namespace Stabilograph
             try
             {
                 toolStripButton3.Enabled = false;
-                ResetSeries();
+                //ResetSeries();
                 //_indicatorsForm.ResetIndicators();
 
                 _diagnosticTimer.Tick += CompleteDiagnostic;
@@ -291,7 +291,7 @@ namespace Stabilograph
             }
         }
 
-        public PlotData _plotData = new PlotData();
+        //public PlotData _plotData = new PlotData();
         private void UpdateModel(List<float> weights)
         {
             var interpolatedWeights = _interpolator.Interpolate(weights);
@@ -303,17 +303,19 @@ namespace Stabilograph
             _rightState.ProcessNext(rightCenter);
             
             _indicatorsForm.UpdateView(_leftState.Indicators, _rightState.Indicators);
-            var data = new PlotData() {LeftPoint = leftCenter, RightPoint = rightCenter};
-            Interlocked.Exchange(ref _plotData, data);
+            //var data = new PlotData() {LeftPoint = leftCenter, RightPoint = rightCenter};
+            //Interlocked.Exchange(ref _plotData, data);
+            //this._platformControl1
+            this.platformControl1.DisplayPlotData(leftCenter);
         }
 
 
         private void updatePlotTimer_Tick(object sender, EventArgs e)
         {
-            if (updatePlotTimer.Tag != _plotData)
+            //if (updatePlotTimer.Tag != _plotData)
             {
-                updatePlotTimer.Tag = _plotData;
-                this.DisplayPlotData(_plotData);
+                //updatePlotTimer.Tag = _plotData;
+                //this.DisplayPlotData(_plotData);
             }
         }
     }

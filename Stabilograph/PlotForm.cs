@@ -15,7 +15,7 @@ using OxyPlot.Series;
 
 namespace Stabilograph
 {
-    public partial class MainForm
+    public class PlotForm
     {
         public class PlotData
         {
@@ -55,7 +55,7 @@ namespace Stabilograph
             // 
             // PlotForm
             // 
-            this.Controls.Add(this.plotView);
+            //this.Controls.Add(this.plotView);
 
             var greyColor = OxyColor.FromRgb(0, 0, 0);
             var top = PlatformHeight / 2;

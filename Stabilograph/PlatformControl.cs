@@ -25,6 +25,9 @@ namespace Stabilograph
         public PlatformControl()
         {
             InitializeComponent();
+
+            SuspendLayout();
+
             this.plotView = new OxyPlot.WindowsForms.PlotView();
 
             this.plotView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -45,8 +48,11 @@ namespace Stabilograph
 
             plotModel.PlotType = PlotType.Cartesian;
 
-            var axisY = new LinearAxis();
+            var axisY = new LinearAxis(){AbsoluteMinimum = bottom, Minimum = bottom, Maximum = top, AbsoluteMaximum = top};
             axisY.Key = "y";
+            //axisY.AbsoluteMaximum = top;
+            //axisY.AbsoluteMinimum = bottom;
+
             axisY.MinimumPadding = 0.1;
             axisY.PositionAtZeroCrossing = true;
             axisY.Position = AxisPosition.Left;
@@ -58,7 +64,9 @@ namespace Stabilograph
 
             var axisX = new LinearAxis();
             axisX.Key = "x";
-            axisX.AbsoluteMaximum = right;
+            //axisX.AbsoluteMinimum = left;
+            //axisX.AbsoluteMaximum = right;
+            
             axisX.Position = AxisPosition.Bottom;
             axisX.MinimumPadding = 0.1;
             axisX.PositionAtZeroCrossing = true;
@@ -78,6 +86,8 @@ namespace Stabilograph
             _series = series;
 
             this.plotView.Model = plotModel;
+
+            ResumeLayout(true);
         }
 
 

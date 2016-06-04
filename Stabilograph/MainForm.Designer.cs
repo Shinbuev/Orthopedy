@@ -40,6 +40,7 @@
             this._diagnosticTimer = new System.Windows.Forms.Timer(this.components);
             this.readerTimer = new System.Windows.Forms.Timer(this.components);
             this.updatePlotTimer = new System.Windows.Forms.Timer(this.components);
+            this.platformControl1 = new Stabilograph.PlatformControl();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -104,12 +105,21 @@
             this.updatePlotTimer.Enabled = true;
             this.updatePlotTimer.Tick += new System.EventHandler(this.updatePlotTimer_Tick);
             // 
+            // platformControl1
+            // 
+            this.platformControl1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.platformControl1.Location = new System.Drawing.Point(0, 39);
+            this.platformControl1.Name = "platformControl1";
+            this.platformControl1.Size = new System.Drawing.Size(425, 448);
+            this.platformControl1.TabIndex = 7;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(760, 487);
+            this.Controls.Add(this.platformControl1);
             this.Controls.Add(this.toolStrip1);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -137,6 +147,7 @@
         private System.Windows.Forms.Timer _diagnosticTimer;
         private System.Windows.Forms.Timer readerTimer;
         private System.Windows.Forms.Timer updatePlotTimer;
+        private PlatformControl platformControl1;
     }
 }
 
