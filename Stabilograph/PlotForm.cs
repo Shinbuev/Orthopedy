@@ -103,7 +103,7 @@ namespace Stabilograph
             //axisY.Minimum = bottom - 10;
             //axisY.AbsoluteMaximum = top + 10;
             //axisY.AbsoluteMinimum = bottom - 10;
-            axisY.MinimumPadding = 0.1;
+            //axisY.MinimumPadding = 0.1;
             //axisY.PositionAtZeroCrossing = true;
             axisY.Position = AxisPosition.Left;
             //axisY.TickStyle = OxyPlot.Axes.TickStyle.Crossing;      
@@ -119,7 +119,7 @@ namespace Stabilograph
             leftX.Key = "x1";
             //leftX.Maximum = right;
             //leftX.Minimum = left;
-            leftX.AbsoluteMaximum = right;
+            //leftX.AbsoluteMaximum = right;
             //leftX.AbsoluteMinimum = left - 1;
             leftX.Position = AxisPosition.Bottom;
             leftX.MinimumPadding = 0.1;
@@ -135,7 +135,7 @@ namespace Stabilograph
             //rightX.Maximum = right;
             //rightX.Minimum = left;
             //rightX.AbsoluteMaximum = right + 1;
-            rightX.AbsoluteMinimum = left;
+            //rightX.AbsoluteMinimum = left;
             rightX.Position = AxisPosition.Bottom;
             rightX.MinimumPadding = 0.1;
             //rightX.PositionAtZeroCrossing = true;
@@ -148,8 +148,8 @@ namespace Stabilograph
 
             var topX = new LinearAxis();
             topX.Key = "x";
-            topX.Maximum = right;
-            topX.Minimum = left;
+            //topX.Maximum = right;
+            //topX.Minimum = left;
             //rightX.AbsoluteMaximum = 2* right + 10;
             //rightX.AbsoluteMinimum = 2* left - 10;
             topX.Position = AxisPosition.Top;

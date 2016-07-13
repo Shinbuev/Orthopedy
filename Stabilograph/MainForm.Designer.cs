@@ -110,7 +110,7 @@
             this.platformControl1.Dock = System.Windows.Forms.DockStyle.Left;
             this.platformControl1.Location = new System.Drawing.Point(0, 39);
             this.platformControl1.Name = "platformControl1";
-            this.platformControl1.Size = new System.Drawing.Size(425, 448);
+            this.platformControl1.Size = new System.Drawing.Size(760, 448);
             this.platformControl1.TabIndex = 7;
             // 
             // MainForm
